@@ -30,10 +30,6 @@ void Almacena::set_mouths(std::vector<Rect> mouths){
 	mymouths=mouths;
 }
 
-void Almacena::set_time(double time){
-	mytime=time;
-}
-
 std::vector<Rect> Almacena::get_faces(){
 	return(myfaces);
 }
@@ -54,6 +50,3 @@ std::vector<Rect> Almacena::get_mouths(){
 	return(mymouths);
 }
 
-double Almacena::get_time(){ 
-	return(mytime);
-}

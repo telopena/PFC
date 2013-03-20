@@ -17,7 +17,7 @@ private:
 	std::vector<Rect> myeyes_l;
 	std::vector<Rect> mynoses;
 	std::vector<Rect> mymouths;
-	double mytime;
+	
 public:
 	Almacena(void);
 	~Almacena(void);
@@ -26,12 +26,10 @@ public:
 	void set_eyes_l(std::vector<Rect> eyes_l);
 	void set_noses(std::vector<Rect> noses);
 	void set_mouths(std::vector<Rect> mouths);
-	void set_time(double time);
 	std::vector<Rect> get_faces();
 	std::vector<Rect> get_eyes_r();
 	std::vector<Rect> get_eyes_l();
 	std::vector<Rect> get_noses();
 	std::vector<Rect> get_mouths();
-	double get_time();
 };
 
