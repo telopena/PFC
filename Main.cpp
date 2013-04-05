@@ -7,6 +7,7 @@
 #include "FaceDetector.h"
 #include "Draw.h"
 #include "Almacena.h"
+#include "Clasificador.h"
 #include <time.h>
 
 using namespace std;
@@ -21,7 +22,12 @@ int main( void )
 	Almacena almacena;
 	Draw draw;
 	FaceDetector face_detector;
-	double t;
+	Clasificador clasificador;
+	double t_fps;
+	//double initTimeSeconds= time(NULL);
+	//double initTimeMill= initTimeSeconds*1000;
+	//double marca= (double)cv::getTickCount();
+
 
 
 
@@ -31,9 +37,10 @@ int main( void )
 	{
 		for(;;)
 		{
-			t = (double)cv::getTickCount();
+			t_fps = (double)cv::getTickCount();
 			frame_capturado = cvQueryFrame( capture );
-		    flip(frame_capturado,frame_capturado,1);
+			//marca= ( (double)cv::getTickCount() - marca)*1000./getTickFrequency();
+			flip(frame_capturado,frame_capturado,1);
 			cvtColor(frame_capturado ,frame_gray , CV_BGR2GRAY );
 			equalizeHist( frame_gray, frame_gray );
 
@@ -42,9 +49,10 @@ int main( void )
 			if( !frame_gray.empty() )
 			{ 
 				almacena=face_detector.Detect( frame_gray); 
-				t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-			    cout << "I am working at " << 1/t << " FPS" << std::endl;
+				t_fps = ((double)cv::getTickCount() - t_fps) / cv::getTickFrequency();
+				cout << "I am working at " << 1/t_fps << " FPS" << std::endl;
 				frame_capturado=draw.Dibujar(frame_capturado,almacena);
+				clasificador.Clasifica(almacena);
 				imshow("Mostrar",frame_capturado);
 			}
 
@@ -56,7 +64,7 @@ int main( void )
 
 			if( (char)c == 'c' ) { break; }
 
-			
+
 
 
 
@@ -66,6 +74,7 @@ int main( void )
 	cvReleaseCapture( &capture );
 	face_detector.~FaceDetector();
 	almacena.~Almacena();
+	clasificador.~Clasificador();
 	draw.~Draw();
 	~frame_capturado;
 	~frame_gray;

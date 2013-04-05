@@ -44,5 +44,5 @@ std::vector<Rect> NoseDetector::getVector(){
 
 void NoseDetector:: run(){
 
-Detect();
+	Detect();
 }

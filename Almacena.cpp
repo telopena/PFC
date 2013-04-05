@@ -30,6 +30,7 @@ void Almacena::set_mouths(std::vector<Rect> mouths){
 	mymouths=mouths;
 }
 
+
 std::vector<Rect> Almacena::get_faces(){
 	return(myfaces);
 }
@@ -49,4 +50,6 @@ std::vector<Rect> Almacena::get_noses(){
 std::vector<Rect> Almacena::get_mouths(){
 	return(mymouths);
 }
+
+
 

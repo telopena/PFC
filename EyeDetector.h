@@ -25,10 +25,10 @@ public:
 	void setVector(std::vector<Rect> vector);
 	Mat getROI();
 	std::vector<Rect> getVector();
-	
- private:
+
+private:
 	virtual void run();
 
-	
-	};
+
+};
 

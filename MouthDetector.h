@@ -27,7 +27,7 @@ public:
 	Mat getROI();
 	std::vector<Rect> getVector();
 
-	private:
+private:
 	virtual void run();
 
 };

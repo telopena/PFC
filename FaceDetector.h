@@ -11,6 +11,7 @@
 #include "MouthDetector.h"
 #include "Almacena.h"
 
+
 using namespace std;
 using namespace cv;
 

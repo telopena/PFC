@@ -46,5 +46,5 @@ std::vector<Rect> MouthDetector::getVector(){
 
 void MouthDetector:: run(){
 
-Detect();
+	Detect();
 }

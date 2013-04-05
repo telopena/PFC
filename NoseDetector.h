@@ -25,7 +25,7 @@ public:
 	void setVector(std::vector<Rect>);
 	std::vector<Rect>getVector();
 
-	private:
+private:
 	virtual void run();
 
 };
