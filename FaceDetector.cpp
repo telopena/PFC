@@ -41,7 +41,7 @@ Almacena FaceDetector:: Detect(Mat frame)
 
 
 
-	face_classifier->detectMultiScale( frame, faces, 1.1, 2, 0|CV_HAAR_FIND_BIGGEST_OBJECT,Size(100, 100) );
+	face_classifier->detectMultiScale( frame, faces, 1.1, 2, 0|CV_HAAR_FIND_BIGGEST_OBJECT,Size(150, 150) ); //100x100
 	almacena.set_faces(faces);
 
 	for( size_t i = 0; i < faces.size(); i++ ){
@@ -80,6 +80,7 @@ Almacena FaceDetector:: Detect(Mat frame)
 		almacena.set_eyes_l(eyes_detect_l->getVector());
 
 		nose_detect->join_thread();
+		//if ( (nose_detect->getVector()).size() == 0) {cout<<"NO SE HA DETECTADO NARIZ"<<endl;}
 		almacena.set_noses(nose_detect->getVector());
 
 		mouth_detect->join_thread();

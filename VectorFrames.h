@@ -20,5 +20,8 @@ private:
 public:
 	VectorFrames(void);
 	~VectorFrames(void);
+	void Decide(int i);
+	void addtovector(FrameClasificado);
+	std::vector<FrameClasificado> getvector();
 };
 

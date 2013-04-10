@@ -44,6 +44,7 @@ Mat Draw:: Dibujar(Mat frame,Almacena almacena){
 
 		}
 
+		//line(frame,Point( (almacena.get_faces())[i].x+(dimensiones_cara.width)/2,(almacena.get_faces())[i].y),Point((almacena.get_faces())[i].x+(dimensiones_cara.width)/2,(almacena.get_faces())[i].y+dimensiones_cara.height),Scalar(20,20,20),2,8,0);
 	}
 	return(frame);
 

@@ -3,6 +3,7 @@
 
 FrameClasificado::FrameClasificado(void)
 {
+	lanzado=0;
 }
 
 
@@ -15,15 +16,26 @@ void FrameClasificado::setTime(double time){
 
 }
 
-void FrameClasificado:: setLR( enum options aux){
-	my_LR=aux;
+void FrameClasificado::setmy_decision(int decision){
+
+	my_decision=decision;
+
 }
 
-void FrameClasificado:: setUD(enum options aux){
-	my_UD=aux;
+void FrameClasificado:: setlanzado(int lanzar){
+	lanzado=lanzar;
 }
+
 
 double FrameClasificado:: getTime(){
 	return(my_time);
 }
 
+int FrameClasificado:: getmy_decision(){
+	return(my_decision);
+
+}
+
+int FrameClasificado:: getlanzado(){
+	return(lanzado);
+}

@@ -15,6 +15,6 @@ class Clasificador
 public:
 	Clasificador(void);
 	~Clasificador(void);
-	void Clasifica(Almacena cara);
+	 int Clasifica(Almacena cara);
 };
 

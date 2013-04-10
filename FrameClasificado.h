@@ -15,16 +15,17 @@ class FrameClasificado
 	
 private:
 	double my_time;
-	enum options {L,R,D,UP,OK,N,U}my_LR,my_UD;
+	int my_decision;
+	int lanzado;
 public:
 	FrameClasificado(void);
 	~FrameClasificado(void);
 	void setTime(double time);
-	void setLR(enum options aux);
-	void setUD(enum options aux);
+	void setmy_decision(int decision);
+	void setlanzado(int lanzar);
 	double getTime();
-	//options getLR();
-	//options getUD();
+	int getmy_decision();
+	int getlanzado();
 
 };
 

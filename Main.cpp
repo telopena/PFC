@@ -8,6 +8,8 @@
 #include "Draw.h"
 #include "Almacena.h"
 #include "Clasificador.h"
+#include "FrameClasificado.h"
+#include "VectorFrames.h"
 #include <time.h>
 
 using namespace std;
@@ -23,10 +25,12 @@ int main( void )
 	Draw draw;
 	FaceDetector face_detector;
 	Clasificador clasificador;
+	FrameClasificado frame_clasificado;
+	VectorFrames vector_frames;
+	int retorno;
 	double t_fps;
-	//double initTimeSeconds= time(NULL);
-	//double initTimeMill= initTimeSeconds*1000;
-	//double marca= (double)cv::getTickCount();
+	double marca;
+	int i=0;
 
 
 
@@ -36,10 +40,10 @@ int main( void )
 	if( capture )
 	{
 		for(;;)
-		{
+		{  
 			t_fps = (double)cv::getTickCount();
 			frame_capturado = cvQueryFrame( capture );
-			//marca= ( (double)cv::getTickCount() - marca)*1000./getTickFrequency();
+			marca= ((double)cv::getTickCount())*1000. / cv::getTickFrequency(); //REFERENCIA DESDE QUE ENCENDIU O PC
 			flip(frame_capturado,frame_capturado,1);
 			cvtColor(frame_capturado ,frame_gray , CV_BGR2GRAY );
 			equalizeHist( frame_gray, frame_gray );
@@ -52,7 +56,11 @@ int main( void )
 				t_fps = ((double)cv::getTickCount() - t_fps) / cv::getTickFrequency();
 				cout << "I am working at " << 1/t_fps << " FPS" << std::endl;
 				frame_capturado=draw.Dibujar(frame_capturado,almacena);
-				clasificador.Clasifica(almacena);
+				retorno=clasificador.Clasifica(almacena);
+				frame_clasificado.setmy_decision(retorno);
+				frame_clasificado.setTime(marca);
+				vector_frames.addtovector(frame_clasificado);
+				vector_frames.Decide(i);
 				imshow("Mostrar",frame_capturado);
 			}
 
@@ -66,7 +74,7 @@ int main( void )
 
 
 
-
+			i++;
 
 		}
 	}
@@ -76,6 +84,8 @@ int main( void )
 	almacena.~Almacena();
 	clasificador.~Clasificador();
 	draw.~Draw();
+	frame_clasificado.~FrameClasificado();
+	//vector_frames.~VectorFrames();
 	~frame_capturado;
 	~frame_gray;
 	return 0;

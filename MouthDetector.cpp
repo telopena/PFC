@@ -19,7 +19,7 @@ void MouthDetector::Detect(){
 
 	std::vector<Rect> v_mouth;
 
-	mouth_classifier->detectMultiScale( frame_ROI, v_mouth, 1.1, 2, 0 |CV_HAAR_FIND_BIGGEST_OBJECT, Size(22, 15) );
+	mouth_classifier->detectMultiScale( frame_ROI, v_mouth, 1.1, 2, 0 |CV_HAAR_FIND_BIGGEST_OBJECT, Size(25, 17) ); //22x15
 
 	setVector(v_mouth);
 }
