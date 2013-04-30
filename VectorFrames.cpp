@@ -57,7 +57,7 @@ void VectorFrames::Decide(int i){
 				if( (frames[i].getmy_decision()) == (frames[i-j].getmy_decision()) ){contador++;}
 			}
 
-			if (contador > 6) {
+			if (contador > 4) {
 
 				frames[i].setlanzado(1);
 

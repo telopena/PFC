@@ -3,6 +3,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include"Almacena.h"
+#include"LucasKanade.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -15,6 +16,6 @@ class Clasificador
 public:
 	Clasificador(void);
 	~Clasificador(void);
-	 int Clasifica(Almacena cara);
+	int Clasifica(Almacena cara,LucasKanade kanade);
 };
 

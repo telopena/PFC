@@ -43,8 +43,9 @@ Mat Draw:: Dibujar(Mat frame,Almacena almacena){
 			rectangle(frame,Point((almacena.get_faces())[i].x+(almacena.get_mouths())[j].x,(almacena.get_faces())[i].y+(dimensiones_cara.height)/2+(almacena.get_mouths())[j].y),Point((almacena.get_faces())[i].x+(almacena.get_mouths())[j].x+(almacena.get_mouths())[j].width,(almacena.get_faces())[i].y+(dimensiones_cara.height)/2+(almacena.get_mouths())[j].y+(almacena.get_mouths())[j].height), Scalar( 0, 255, 0 ), 2, 8, 0 );
 
 		}
-
+		
 		//line(frame,Point( (almacena.get_faces())[i].x+(dimensiones_cara.width)/2,(almacena.get_faces())[i].y),Point((almacena.get_faces())[i].x+(dimensiones_cara.width)/2,(almacena.get_faces())[i].y+dimensiones_cara.height),Scalar(20,20,20),2,8,0);
+		//line(frame,Point( (almacena.get_faces())[i].x,(almacena.get_faces())[i].y + (dimensiones_cara.height)/2),Point((almacena.get_faces())[i].x+dimensiones_cara.width,(almacena.get_faces())[i].y+(dimensiones_cara.height)/2),Scalar(20,20,20),2,8,0);	
 	}
 	return(frame);
 

@@ -31,6 +31,23 @@ void Almacena::set_mouths(std::vector<Rect> mouths){
 }
 
 
+void Almacena:: set_P0(Point2f aux){
+	P0=aux;
+}
+
+void Almacena:: set_P1(Point2f aux1){
+	P1=aux1;
+}
+
+void Almacena:: set_P2(Point2f aux2){
+	P2=aux2;
+}
+
+void Almacena:: set_P3(Point2f aux3){
+	P3=aux3;
+}
+
+
 std::vector<Rect> Almacena::get_faces(){
 	return(myfaces);
 }
@@ -53,3 +70,18 @@ std::vector<Rect> Almacena::get_mouths(){
 
 
 
+Point2f Almacena:: get_P0(){
+	return(P0);
+}
+
+Point2f Almacena:: get_P1(){
+	return(P1);
+}
+
+Point2f Almacena:: get_P2(){
+	return(P2);
+}
+
+Point2f Almacena:: get_P3(){
+	return(P3);
+}

@@ -2,15 +2,12 @@
 #include <opencv2/objdetect/objdetect.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
 #include <iostream>
 #include <stdio.h>
-
 #include "EyeDetector.h"
 #include "NoseDetector.h"
 #include "MouthDetector.h"
 #include "Almacena.h"
-
 
 using namespace std;
 using namespace cv;
@@ -28,7 +25,7 @@ private:
 public:
 	FaceDetector();
 	~FaceDetector(void);
-	Almacena Detect(Mat frame);
+	Almacena Detect(Mat gray);
 
 };
 

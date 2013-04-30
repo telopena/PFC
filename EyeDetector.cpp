@@ -26,7 +26,7 @@ void EyeDetector::Detect(){
 	std::vector<Rect> v_eye;
 
 
-	eye_classifier->detectMultiScale( frame_ROI, v_eye, 1.1, 2, 0 |CV_HAAR_FIND_BIGGEST_OBJECT, Size(22, 15) );//18x12
+	eye_classifier->detectMultiScale( frame_ROI, v_eye, 1.1, 2, 0 |CV_HAAR_FIND_BIGGEST_OBJECT, Size(18, 12) );//18x12
 
 
 	setVector(v_eye);

@@ -2,6 +2,7 @@
 
 
 
+
 FaceDetector::FaceDetector(void)
 
 {
@@ -31,9 +32,7 @@ FaceDetector::~FaceDetector(void)
 
 }
 
-Almacena FaceDetector:: Detect(Mat frame)
-
-{
+Almacena FaceDetector::Detect(Mat gray){
 
 
 	std::vector<Rect> faces;
@@ -41,18 +40,23 @@ Almacena FaceDetector:: Detect(Mat frame)
 
 
 
-	face_classifier->detectMultiScale( frame, faces, 1.1, 2, 0|CV_HAAR_FIND_BIGGEST_OBJECT,Size(150, 150) ); //100x100
+
+	face_classifier->detectMultiScale( gray, faces, 1.1, 2, 0|CV_HAAR_FIND_BIGGEST_OBJECT,Size(100, 100) ); //100x100
 	almacena.set_faces(faces);
+
+	Mat ROI_eyer,ROI_eyel,ROI_nose,ROI_mouth,cara;
+	Size dimensiones_cara;
+
 
 	for( size_t i = 0; i < faces.size(); i++ ){
 
-		Size dimensiones_cara= (frame(faces[i])).size();
-		Mat cara=frame(faces[i]);
-		Mat ROI_eyer,ROI_eyel,ROI_nose,ROI_mouth;
+		dimensiones_cara= (gray(faces[i])).size();
+		cara=gray(faces[i]);
 		ROI_eyer=cara(Range(0,(dimensiones_cara.height)/2),Range((dimensiones_cara.width)/2,dimensiones_cara.width));
 		ROI_eyel=cara(Range(0,(dimensiones_cara.height)/2),Range(0,(dimensiones_cara.width)/2));
 		ROI_nose=cara(Range((dimensiones_cara.height)/4,(dimensiones_cara.height)*3/4),Range((dimensiones_cara.width)/4,(dimensiones_cara.width)*3/4));
 		ROI_mouth=cara(Range((dimensiones_cara.height)/2,dimensiones_cara.height),Range::all());
+
 
 
 
@@ -76,15 +80,21 @@ Almacena FaceDetector:: Detect(Mat frame)
 		eyes_detect_r->join_thread();
 		almacena.set_eyes_r(eyes_detect_r->getVector());
 
+
+
 		eyes_detect_l->join_thread();
 		almacena.set_eyes_l(eyes_detect_l->getVector());
 
+
 		nose_detect->join_thread();
-		//if ( (nose_detect->getVector()).size() == 0) {cout<<"NO SE HA DETECTADO NARIZ"<<endl;}
 		almacena.set_noses(nose_detect->getVector());
+
 
 		mouth_detect->join_thread();
 		almacena.set_mouths(mouth_detect->getVector());
+
+
+
 
 
 
