@@ -3,6 +3,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include "FrameClasificado.h"
+#include "NoseDetector.h"
+#include "Almacena.h"
 
 
 #include <iostream>
@@ -23,5 +25,6 @@ public:
 	void Decide(int i);
 	void addtovector(FrameClasificado);
 	std::vector<FrameClasificado> getvector();
+	int comprobar (int i,double marca);
 };
 

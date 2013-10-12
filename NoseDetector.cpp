@@ -20,7 +20,7 @@ void NoseDetector::Detect(){
 
 	std::vector<Rect> v_nose;
 
-	nose_classifier->detectMultiScale( frame_ROI, v_nose, 1.1, 2, 0 |CV_HAAR_FIND_BIGGEST_OBJECT, Size(18, 15) ); //18x15
+	nose_classifier->detectMultiScale( frame_ROI, v_nose, 1.1, 2, 0 |CV_HAAR_FIND_BIGGEST_OBJECT, Size(3*18, 3*15) ); //18x15
 
 	setVector(v_nose);
 }

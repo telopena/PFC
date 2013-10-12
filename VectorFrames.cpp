@@ -32,9 +32,7 @@ void VectorFrames::Decide(int i){
 			break;
 		case 4: cout<<"Mirar hacia la izquierda"<<endl;
 			break;
-		case 5: cout<<"Aceptar"<<endl;
-			break;
-		case 6: cout<<"Desconocido"<<endl;
+		case 5: cout<<"Desconocido"<<endl;
 			break;
 
 		}
@@ -49,13 +47,14 @@ void VectorFrames::Decide(int i){
 			aux--;
 
 		}
-
+		
 		if (  (frames[i].getTime() - time)  > 1000 ){
 
 			for(int j=1;j<11;j++){
 
 				if( (frames[i].getmy_decision()) == (frames[i-j].getmy_decision()) ){contador++;}
 			}
+
 
 			if (contador > 4) {
 
@@ -74,9 +73,7 @@ void VectorFrames::Decide(int i){
 					break;
 				case 4: cout<<"Mirar hacia la izquierda"<<endl;
 					break;
-				case 5: cout<<"Aceptar"<<endl;
-					break;
-				case 6: cout<<"Desconocido"<<endl;
+				case 5: cout<<"Desconocido"<<endl;
 					break;
 
 				}
@@ -98,6 +95,7 @@ void VectorFrames::Decide(int i){
 }
 
 
+
 void VectorFrames::addtovector(FrameClasificado frame){
 
 	frames.push_back(frame);
@@ -105,4 +103,19 @@ void VectorFrames::addtovector(FrameClasificado frame){
 
 std::vector<FrameClasificado> VectorFrames::getvector(){
 	return(frames);
+}
+
+
+int VectorFrames:: comprobar(int i, double marca){
+double time;
+int aux=i;
+
+while(frames[aux].getdetect()!=1){
+	aux--;
+}
+time=frames[aux].getTime();
+
+if(marca-time <3000){return(1);}
+else{return(0);}
+
 }

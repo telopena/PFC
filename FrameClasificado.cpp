@@ -26,6 +26,10 @@ void FrameClasificado:: setlanzado(int lanzar){
 	lanzado=lanzar;
 }
 
+void FrameClasificado:: setdetect(int detect){
+	caradetect=detect;
+}
+
 
 double FrameClasificado:: getTime(){
 	return(my_time);
@@ -38,4 +42,9 @@ int FrameClasificado:: getmy_decision(){
 
 int FrameClasificado:: getlanzado(){
 	return(lanzado);
+}
+
+int FrameClasificado::getdetect(){
+	
+	return(caradetect);
 }

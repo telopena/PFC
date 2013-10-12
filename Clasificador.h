@@ -13,9 +13,12 @@ using namespace cv;
 
 class Clasificador
 {
+private:
+	double restahorizontal;
+	double restavertical;
 public:
 	Clasificador(void);
 	~Clasificador(void);
-	int Clasifica(Almacena cara,LucasKanade kanade);
+	int Clasifica(Almacena cara,LucasKanade kanade, int a);
 };
 

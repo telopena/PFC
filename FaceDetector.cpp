@@ -41,7 +41,7 @@ Almacena FaceDetector::Detect(Mat gray){
 
 
 
-	face_classifier->detectMultiScale( gray, faces, 1.1, 2, 0|CV_HAAR_FIND_BIGGEST_OBJECT,Size(100, 100) ); //100x100
+	face_classifier->detectMultiScale( gray, faces, 1.1, 2, 0|CV_HAAR_FIND_BIGGEST_OBJECT,Size(200, 200) ); //100x100
 	almacena.set_faces(faces);
 
 	Mat ROI_eyer,ROI_eyel,ROI_nose,ROI_mouth,cara;
@@ -52,46 +52,46 @@ Almacena FaceDetector::Detect(Mat gray){
 
 		dimensiones_cara= (gray(faces[i])).size();
 		cara=gray(faces[i]);
-		ROI_eyer=cara(Range(0,(dimensiones_cara.height)/2),Range((dimensiones_cara.width)/2,dimensiones_cara.width));
-		ROI_eyel=cara(Range(0,(dimensiones_cara.height)/2),Range(0,(dimensiones_cara.width)/2));
-		ROI_nose=cara(Range((dimensiones_cara.height)/4,(dimensiones_cara.height)*3/4),Range((dimensiones_cara.width)/4,(dimensiones_cara.width)*3/4));
-		ROI_mouth=cara(Range((dimensiones_cara.height)/2,dimensiones_cara.height),Range::all());
+		//ROI_eyer=cara(Range(0,(dimensiones_cara.height)/2),Range((dimensiones_cara.width)/2,dimensiones_cara.width));
+		//ROI_eyel=cara(Range(0,(dimensiones_cara.height)/2),Range(0,(dimensiones_cara.width)/2));
+		//ROI_nose=cara(Range((dimensiones_cara.height)/4,(dimensiones_cara.height)*3/4),Range((dimensiones_cara.width)/4,(dimensiones_cara.width)*3/4));
+		//ROI_mouth=cara(Range((dimensiones_cara.height)/2,dimensiones_cara.height),Range::all());
+		ROI_nose=cara(Range((dimensiones_cara.height)/4,(dimensiones_cara.height)*3/4),Range::all());
 
 
 
+		//eyes_detect_r->setROI(ROI_eyer);
+		//eyes_detect_r->start_thread();
 
-		eyes_detect_r->setROI(ROI_eyer);
-		eyes_detect_r->start_thread();
-
-		eyes_detect_l->setROI(ROI_eyel);
-		eyes_detect_l->start_thread();
+		//eyes_detect_l->setROI(ROI_eyel);
+		//eyes_detect_l->start_thread();
 
 		nose_detect->setROI(ROI_nose);
 		nose_detect->start_thread();
 
-		mouth_detect->setROI(ROI_mouth);
-		mouth_detect->start_thread();
+		//mouth_detect->setROI(ROI_mouth);
+		//mouth_detect->start_thread();
 
 
 
 
 
 
-		eyes_detect_r->join_thread();
-		almacena.set_eyes_r(eyes_detect_r->getVector());
+		//eyes_detect_r->join_thread();
+		//almacena.set_eyes_r(eyes_detect_r->getVector());
 
 
 
-		eyes_detect_l->join_thread();
-		almacena.set_eyes_l(eyes_detect_l->getVector());
+		//eyes_detect_l->join_thread();
+		//almacena.set_eyes_l(eyes_detect_l->getVector());
 
 
 		nose_detect->join_thread();
 		almacena.set_noses(nose_detect->getVector());
 
 
-		mouth_detect->join_thread();
-		almacena.set_mouths(mouth_detect->getVector());
+		//mouth_detect->join_thread();
+		//almacena.set_mouths(mouth_detect->getVector());
 
 
 
