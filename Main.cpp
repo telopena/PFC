@@ -8,11 +8,11 @@
 #include "FaceDetector.h"
 #include "Draw.h"
 #include "Almacena.h"
-#include "Clasificador.h"
 #include "FrameClasificado.h"
 #include "VectorFrames.h"
+#include "ProfileLeft.h"
+#include "ProfileRigth.h"
 #include <time.h>
-#include "LucasKanade.h"
 
 using namespace std;
 using namespace cv;
@@ -22,331 +22,227 @@ int main( void )
 {
 
 	CvCapture* capture;
-	Mat frame_capturado,frame_gray,frame_pregay,hsv,mask,hue,hist,backproj,mat_aux,template_cara1,template_cara2,template_nariz1,template_nariz2,result1,result2,result_n1,result_n2;
+	Mat frame_capturado,frame_gray,template_cara1,result1,buscar_cara,velocidad_cara;
 	Almacena almacena;
 	Draw draw;
 	FaceDetector face_detector;
-	Clasificador clasificador;
 	FrameClasificado frame_clasificado;
 	VectorFrames vector_frames;
-	LucasKanade kanade;
-	NoseDetector nose;
-	int retorno,vmin = 10, vmax = 256, smin = 30,hsize = 16,i=0;
-	double t_fps,marca;
-	double minVal,minVal_n,maxVal,maxVal_n;
-	Size dimensiones_cara,dimensiones_nariz;
-	Point2f p3;
-	std::vector<Rect> faces;
-	std::vector<Rect> aux2;
-	float hranges[] = {0,180};
-	const float* phranges = hranges;
-	CvConnectedComp track_comp;
-	Rect trackWindow,aux,aux_n;
-	IplImage img1,img2,img;
-	CvPoint minloc,minloc_n,maxloc,maxloc_n;
+	ProfileLeft profile_detectorL;
+	ProfileRigth profile_detectorR;
+	int retorno,i=0,solape_cara=1,profileL=0,profileR=0;
+	double t_fps1,t_fps2,marca;
+	double minVal,maxVal;
+	Size dimensiones_cara;
+	Point2f p3,coor_cara;
+	std::vector<Rect> newfaces,profilesL,profilesR;
+	Rect aux,face;
+	IplImage img1;
+	CvPoint minloc,maxloc;
+	bool permiso;
 
+	velocidad_cara.create(240,320,CV_8UC3);
 
 
 
 	capture = cvCaptureFromCAM(-1);
+	cvSetCaptureProperty( capture, CV_CAP_PROP_FRAME_WIDTH, 320 );
+	cvSetCaptureProperty( capture, CV_CAP_PROP_FRAME_HEIGHT, 240 );
+	coor_cara.x=-1;
+	coor_cara.y=-1;
+
 
 	if( capture )
 	{
 		for(;;)
 		{  
-
-			t_fps = (double)cv::getTickCount();
+			permiso=false;
+			velocidad_cara.release();
+			t_fps1 = (double)cv::getTickCount();
+			t_fps2=(double)cv::getTickCount();
 			frame_capturado = cvQueryFrame( capture );
 			marca= ((double)cv::getTickCount())*1000. / cv::getTickFrequency(); //REFERENCIA DESDE QUE ENCENDIU O PC
 			flip(frame_capturado,frame_capturado,1);
 			cvtColor(frame_capturado ,frame_gray , CV_BGR2GRAY );
-			cvtColor(frame_capturado, hsv, CV_BGR2HSV);
 			equalizeHist( frame_gray, frame_gray );
-			
+			velocidad_cara.create(240,320,CV_8UC3);
 
-			//ME QUEDO SOLO CON EL CANAL HUE//
-			//int ch[] = {0, 0};
-			//hue.create(hsv.size(), hsv.depth());
-			//mixChannels(&hsv, 1, &hue, 1, ch, 1);
-
-			//imshow("gray",frame_gray);
-			//imshow("hue",hue);
+			solape_cara=1;
+			profileL=0;
+			profileR=0;
+			frame_clasificado.setprofileL(0);
+			frame_clasificado.setprofileR(0);
 
 
-			
-			//FILTRO PARA CADA CANAL, CON VALORES MÁXIMOS Y MÍNIMOS, y guardo en mask
-			inRange(hsv, Scalar(0, smin, MIN(vmin,vmax)),
-				Scalar(180, 256, MAX(vmin, vmax)), mask);
 
-			//me quedo solo con el canal hue
-			int ch[] = {0, 0};
-			hue.create(hsv.size(), hsv.depth());
-			mixChannels(&hsv, 1, &hue, 1, ch, 1);
-			
+
+
 
 			if( !frame_gray.empty() )
 			{ 
 
 				almacena=face_detector.Detect(frame_gray); 
 
+				profilesL = profile_detectorL.Detect(frame_gray);
+
+				profilesR = profile_detectorR.Detect(frame_gray);
+
+				if (profilesL.size() != 0) {
+					profileL = 1;
+					frame_clasificado.setprofileL(1);
+					//cout<<"perfilizquierda"<<endl;
+
+				}
+				if (profilesR.size() != 0) {
+					profileR = 1;
+					frame_clasificado.setprofileR(1);
+					//cout<<"perfilderecha"<<endl;
+				}
+
+
+
+
+
 
 
 				if(almacena.get_faces().size()!=0){
-
-					cout<<"entro"<<endl;
-
-					faces=almacena.get_faces();
-
 
 
 					for(size_t w = 0; w < (almacena.get_faces()).size(); w++){
 
 						dimensiones_cara=(almacena.get_faces())[w].size();
-						
-						template_cara1=frame_gray(faces[w]).clone();
-						template_cara2=hue(faces[w]);
-						imshow("template1",template_cara1);
-						imshow("template2",template_cara2);
-					
 
-						
-						//OBTENGO ZONAS DE INTERES Y CALCULO HISTOGRAMA DE DICHA ZONA
-						Mat roi= hue (faces[w]);
-						roi= roi(Range((dimensiones_cara.height)/4,(dimensiones_cara.height)*3/4),Range((dimensiones_cara.width)/4,(dimensiones_cara.width)*3/4));
-						Mat maskroi = mask (faces[w]);
-						maskroi= maskroi(Range((dimensiones_cara.height)/4,(dimensiones_cara.height)*3/4),Range((dimensiones_cara.width)/4,(dimensiones_cara.width)*3/4));
-						calcHist(&roi, 1, 0, maskroi, hist, 1, &hsize, &phranges);
-						imshow("hist",hist);
-						normalize(hist, hist, 0, 255, CV_MINMAX);
-						
+						template_cara1=frame_gray(almacena.get_faces()[w]).clone();
 
-						trackWindow=faces[w];
-						
+						face=almacena.get_faces()[w];
+						coor_cara.x=face.x+dimensiones_cara.width/2;
+						coor_cara.y=face.y+dimensiones_cara.height/2;
 
-						if( (almacena.get_noses()).size() != 0) {
-
-							dimensiones_nariz=almacena.get_noses()[w].size();
-							Point2f p2((float)((almacena.get_noses())[w].x + 	((almacena.get_noses())[w].width)/2	), (float)((dimensiones_cara.height)/4 + (almacena.get_noses())[w].y + ((almacena.get_noses())[w].height)/2)); 
-							Point2f p2p((float)(almacena.get_faces()[w].x +(almacena.get_noses())[w].x + 	((almacena.get_noses())[w].width)/2	), (float)(almacena.get_faces()[w].y + (dimensiones_cara.height)/4 + (almacena.get_noses())[w].y + ((almacena.get_noses())[w].height)/2)); 
-							kanade.set_points(p2,0,0);
-							line(frame_capturado,p2p,p2p,Scalar(255,0,0),3,8,0);
-							p3=p2;
-							template_nariz1=template_cara1(Range((dimensiones_cara.height)/4,(dimensiones_cara.height)*3/4),Range::all());
-							template_nariz1=template_nariz1(almacena.get_noses()[w]).clone();
-							//template_nariz2=template_cara2(Range((dimensiones_cara.height)/4,(dimensiones_cara.height)*3/4),Range::all());
-							//template_nariz2=template_nariz2(almacena.get_noses()[w]);
-							imshow("template3",template_nariz1);
-							//imshow("template4",template_nariz2);
-
-						}
-
-
-						if( (almacena.get_noses()).size()==0){
-							kanade.set_points(p3,0,0);
-						}
-
-						if( (i!=0) && ( (almacena.get_noses()).size() ==0) ){
-
-							kanade.calcula_fujo_optico(frame_pregay,frame_gray);
-							Point pnp(kanade.get_points(1,0).x+almacena.get_faces()[w].x,kanade.get_points(1,0).y+almacena.get_faces()[w].y);
-							line(frame_capturado,pnp,pnp,Scalar(255,0,0),3,8,0);
-
-						}
-
+						solape_cara=1;
 
 					}
-
-
 
 
 					frame_capturado=draw.Dibujar(frame_capturado,almacena);
-					retorno=clasificador.Clasifica(almacena,kanade,i);
-					frame_clasificado.setmy_decision(retorno);
+					frame_clasificado.setposcenter_x(coor_cara.x);
+					frame_clasificado.setposcenter_y(coor_cara.y);
 					frame_clasificado.setTime(marca);
 					frame_clasificado.setdetect(1);
 					vector_frames.addtovector(frame_clasificado);
-					vector_frames.Decide(i);
-					
+					vector_frames.Decide(i,marca,velocidad_cara,almacena,profileL,profileR);
+
+
 					i++;
-					t_fps = ((double)cv::getTickCount() - t_fps) / cv::getTickFrequency();
-					cout << "I am working at " << 1/t_fps << " FPS" << std::endl;
+					t_fps1 = ((double)cv::getTickCount() - t_fps1) / cv::getTickFrequency();
+					cout << "I am working at " << 1/t_fps1 << " FPS" << std::endl;
 				}
 
-				if(i!=0 ){//&& (vector_frames.comprobar(i,marca)==1)){
 
-				//result1.create(frame_gray.rows-template_cara1.rows +1,frame_gray.cols-template_cara1.cols +1,frame_gray.depth());
-				//result2.create(hue.rows-template_cara2.rows +1,hue.cols-template_cara2.cols +1,hue.depth());
-				imshow("template1",template_cara1);
+
+
+				if((i!=0 ) && (vector_frames.comprobar(i,marca)==1) && (almacena.get_faces().size()==0)){
+
 					matchTemplate(frame_gray,template_cara1,result1,CV_TM_CCOEFF_NORMED);
-				//matchTemplate(hue,template_cara2,result2,CV_TM_CCOEFF_NORMED);
-				imshow("result1",result1);
-				//imshow("result2",result2);
-				img1=result1;
-				//img1=result2;
-				cvMinMaxLoc(&img1,&minVal,&maxVal,&minloc,&maxloc);
-				aux.x=maxloc.x;
-				aux.y=maxloc.y;
-				aux.width=dimensiones_cara.width;
-				aux.height=dimensiones_cara.height;
-				rectangle(frame_capturado,Point(aux.x,aux.y),Point(aux.x + aux.width,aux.y+aux.height),Scalar(0,0,255),1,CV_AA);
-				
-				
-				matchTemplate(frame_gray,template_nariz1,result_n1,CV_TM_CCOEFF_NORMED);
-				//matchTemplate(hue,template_nariz2,result_n2,CV_TM_CCOEFF_NORMED);
-				imshow("template3",template_nariz1);
-				imshow("result_n1",result_n1);
-				//imshow("result_n2",result_n2);
-				img2=result_n1;
-				//img2=result_n2;
-				cvMinMaxLoc(&img2,&minVal_n,&maxVal_n,&minloc_n,&maxloc_n);
-				aux_n.x=maxloc_n.x;
-				aux_n.y=maxloc_n.y;
-				aux_n.width=dimensiones_nariz.width;
-				aux_n.height=dimensiones_nariz.height;
-				rectangle(frame_capturado,Point(aux_n.x,aux_n.y),Point(aux_n.x + aux_n.width,aux_n.y+aux_n.height),Scalar(0,0,255),1,CV_AA);
-				
+
+					img1=result1;
+
+					cvMinMaxLoc(&img1,&minVal,&maxVal,&minloc,&maxloc);
+					aux.x=maxloc.x;
+					aux.y=maxloc.y;
+					aux.width=dimensiones_cara.width;
+					aux.height=dimensiones_cara.height;
+
+
+
+					if(aux.x<0){aux.x=0;}
+					if(aux.y<0){aux.y=0;}
+					if(aux.x+aux.width > frame_gray.cols){aux.width=frame_gray.cols;}
+					if(aux.y+aux.height >frame_gray.rows){aux.height=frame_gray.rows;}
+
+					Point center_aux(aux.x+aux.width/2,aux.y+aux.height/2);
+
+
+
+					if(coor_cara.x!=-1 && coor_cara.y!=-1){
+
+						if( (abs(coor_cara.x - aux.x) > dimensiones_cara.width/2) && (abs(coor_cara.x - (aux.x+aux.width)) > dimensiones_cara.width/2) ){solape_cara=0;}
+						if( (abs(coor_cara.y - aux.y) > dimensiones_cara.height/2) && (abs(coor_cara.y - (aux.y+aux.height)) > dimensiones_cara.height/2) ){solape_cara=0;}
+						if(	(abs(coor_cara.x - center_aux.x) > dimensiones_cara.width/10 )){solape_cara=0;}
+						if(	(abs(coor_cara.y - center_aux.y) > dimensiones_cara.height/10 )){solape_cara=0;}
+
+					}
+
+
+
+
+					if(solape_cara==1){
+						rectangle(frame_capturado,Point(aux.x,aux.y),Point(aux.x + aux.width,aux.y+aux.height),Scalar(0,0,255),1,CV_AA);
+
+
+						coor_cara.x=center_aux.x;
+						coor_cara.y=center_aux.y;
+						dimensiones_cara.width=aux.width;
+						dimensiones_cara.height=aux.height;
+						face = aux;
+
+
+
+					}
+
+
+					if(solape_cara==0){
+
+
+
+						rectangle(frame_capturado,Point(aux.x,aux.y),Point(aux.x + aux.width,aux.y+aux.height),Scalar(255,255,255),1,CV_AA);
+					}
+
+
+
 				}
 
-	/*			if( (almacena.get_faces().size()==0) ){
 
-					if((i!=0) && (vector_frames.comprobar(i,marca)==1) ){
-
-						if(aux.x<0){aux.x=0;}
-						if(aux.y<0){aux.y=0;}
-						if(aux.x+aux.width > frame_gray.cols){aux.width=frame_gray.cols;}
-						if(aux.y+aux.height >frame_gray.rows){aux.height=frame_gray.rows;}
-						mat_aux=frame_gray(aux);
-						mat_aux=mat_aux(Range((dimensiones_cara.height)/4,(dimensiones_cara.height)*3/4),Range::all());
-						nose.setROI(mat_aux);
-						nose.Detect();
-						almacena.set_noses(nose.getVector());
-						aux2.assign(1,aux);
-						almacena.set_faces(aux2);
-
-						for(size_t w = 0; w < (almacena.get_faces()).size(); w++){
-
-							if( (almacena.get_noses()).size() != 0) {
-							
-								Point2f p2((float)((almacena.get_noses())[w].x + 	((almacena.get_noses())[w].width)/2	), (float)((dimensiones_cara.height)/4 + (almacena.get_noses())[w].y + ((almacena.get_noses())[w].height)/2)); 
-								kanade.set_points(p2,0,0);
-								Point2f p2p((float)(almacena.get_faces()[w].x +	 (almacena.get_noses())[w].x + 	((almacena.get_noses())[w].width)/2	), (float)(almacena.get_faces()[w].y + (dimensiones_cara.height)/4 + (almacena.get_noses())[w].y + ((almacena.get_noses())[w].height)/2)); 
-								line(frame_capturado,p2p,p2p,Scalar(255,0,0),3,8,0);
-								p3=p2;
-							}
-
-							if( (almacena.get_noses()).size()==0){
-								kanade.set_points(p3,0,0);
-							}
+				if( (almacena.get_faces().size()==0)  ){
 
 
-							if( (i!=0) && ( (almacena.get_noses()).size() ==0) ){
+					if((i!=0) && (vector_frames.comprobar(i,marca)==1) && solape_cara==1 ){
 
-								kanade.calcula_fujo_optico(frame_pregay,frame_gray);
-								Point pnp(kanade.get_points(1,0).x+almacena.get_faces()[w].x,kanade.get_points(1,0).y+almacena.get_faces()[w].y);
-								line(frame_capturado,pnp,pnp,Scalar(255,0,0),3,8,0);
 
+						if(almacena.get_faces().size()==0){
+							newfaces.assign(1,aux);
+							almacena.set_faces(newfaces);
+							frame_clasificado.setdetect(0);
+							frame_clasificado.setposcenter_x(coor_cara.x);
+							frame_clasificado.setposcenter_y(coor_cara.y);
+							frame_clasificado.setTime(marca);
+
+							if (profilesL.size() != 0 || profilesR.size() != 0) {
+
+								frame_clasificado.setdetect(1);
 
 							}
 
+							vector_frames.addtovector(frame_clasificado);
+							vector_frames.Decide(i,marca,velocidad_cara,almacena,profileL,profileR);
+							permiso=true;
 						}
 
 
 
-						frame_capturado=draw.Dibujar(frame_capturado,almacena);
-						retorno=clasificador.Clasifica(almacena,kanade,i);
-						frame_clasificado.setmy_decision(retorno);
-						frame_clasificado.setTime(marca);
-						frame_clasificado.setdetect(0);
-						vector_frames.addtovector(frame_clasificado);
-						vector_frames.Decide(i);
-						i++;
-					
-					}
-					
-					t_fps = ((double)cv::getTickCount() - t_fps) / cv::getTickFrequency();
-					cout << "I am working at " << 1/t_fps << " FPS" << std::endl;
-				}
-				
-		*/		
 
-				
-
-				//TRACKING
-				if(i!=0  && (vector_frames.comprobar(i,marca)==1)){
-					calcBackProject(&hue, 1, 0, hist, backproj, &phranges);
-					imshow("back",backproj);
-					backproj &= mask;
-					img=backproj;
-					cvMeanShift(&img, trackWindow,cvTermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 15, 1 ),&track_comp);
-					aux=track_comp.rect;
-					rectangle(frame_capturado,Point(aux.x,aux.y),Point(aux.x + aux.width,aux.y+aux.height),Scalar(0,0,255),3,CV_AA);
-				}
-				
-				
-
-				/*
-				if( (almacena.get_faces().size()==0) ){
-
-					if((i!=0) && (vector_frames.comprobar(i,marca)==1) ){
-
-						if(aux.x<0){aux.x=0;}
-						if(aux.y<0){aux.y=0;}
-						if(aux.x+aux.width > frame_gray.cols){aux.width=frame_gray.cols;}
-						if(aux.y+aux.height >frame_gray.rows){aux.height=frame_gray.rows;}
-						mat_aux=frame_gray(aux);
-						dimensiones_cara=mat_aux.size();
-						mat_aux=mat_aux(Range((dimensiones_cara.height)/4,(dimensiones_cara.height)*3/4),Range::all());
-						nose.setROI(mat_aux);
-						nose.Detect();
-						almacena.set_noses(nose.getVector());
-						aux2.assign(1,aux);
-						almacena.set_faces(aux2);
-
-						for(size_t w = 0; w < (almacena.get_faces()).size(); w++){
-
-							if( (almacena.get_noses()).size() != 0) {
-							
-								Point2f p2((float)((almacena.get_noses())[w].x + 	((almacena.get_noses())[w].width)/2	), (float)((dimensiones_cara.height)/4 + (almacena.get_noses())[w].y + ((almacena.get_noses())[w].height)/2)); 
-								kanade.set_points(p2,0,0);
-								Point2f p2p((float)(almacena.get_faces()[w].x +	 (almacena.get_noses())[w].x + 	((almacena.get_noses())[w].width)/2	), (float)(almacena.get_faces()[w].y + (dimensiones_cara.height)/4 + (almacena.get_noses())[w].y + ((almacena.get_noses())[w].height)/2)); 
-								line(frame_capturado,p2p,p2p,Scalar(255,0,0),3,8,0);
-								p3=p2;
-							}
-
-							if( (almacena.get_noses()).size()==0){
-								kanade.set_points(p3,0,0);
-							}
-
-
-							if( (i!=0) && ( (almacena.get_noses()).size() ==0) ){
-
-								kanade.calcula_fujo_optico(frame_pregay,frame_gray);
-								Point pnp(kanade.get_points(1,0).x+almacena.get_faces()[w].x,kanade.get_points(1,0).y+almacena.get_faces()[w].y);
-								line(frame_capturado,pnp,pnp,Scalar(255,0,0),3,8,0);
-
-
-							}
-
+						if(permiso==true){
+							i++;
 						}
-
-
-
-						frame_capturado=draw.Dibujar(frame_capturado,almacena);
-						retorno=clasificador.Clasifica(almacena,kanade,i);
-						frame_clasificado.setmy_decision(retorno);
-						frame_clasificado.setTime(marca);
-						frame_clasificado.setdetect(0);
-						vector_frames.addtovector(frame_clasificado);
-						vector_frames.Decide(i);
-						i++;
-					
 					}
-					
-					t_fps = ((double)cv::getTickCount() - t_fps) / cv::getTickFrequency();
-					cout << "I am working at " << 1/t_fps << " FPS" << std::endl;
+
+					t_fps2 = ((double)cv::getTickCount() - t_fps2) / cv::getTickFrequency();
+					cout << "I am working at " << 1/t_fps2 << " FPS" << std::endl;
 				}
-				
-				*/
+
+
+
+				imshow("velocidadcara",velocidad_cara);
+
 				imshow("Aplicación",frame_capturado);
 
 
@@ -362,12 +258,6 @@ int main( void )
 
 			if( (char)c == 'c' ) { break; }
 
-			frame_gray.copyTo(frame_pregay);
-
-
-
-
-
 
 
 		}
@@ -375,12 +265,11 @@ int main( void )
 	cvReleaseCapture( &capture );
 	face_detector.~FaceDetector();
 	almacena.~Almacena();
-	clasificador.~Clasificador();
 	draw.~Draw();
 	frame_clasificado.~FrameClasificado();
 	vector_frames.~VectorFrames();
-	kanade.~LucasKanade();
-	nose.~NoseDetector();
+	profile_detectorR.~ProfileRigth();
+	profile_detectorL.~ProfileLeft();
 	return 0;
 }
 

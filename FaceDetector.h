@@ -4,9 +4,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 #include <stdio.h>
-#include "EyeDetector.h"
-#include "NoseDetector.h"
-#include "MouthDetector.h"
+
 #include "Almacena.h"
 
 using namespace std;
@@ -16,10 +14,6 @@ class FaceDetector
 {
 private:
 	CascadeClassifier *face_classifier;
-	EyeDetector *eyes_detect_r;
-	EyeDetector *eyes_detect_l;
-	NoseDetector *nose_detect;
-	MouthDetector *mouth_detect;
 	Almacena almacena;
 
 public:

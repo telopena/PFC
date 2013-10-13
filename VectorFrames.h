@@ -3,7 +3,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include "FrameClasificado.h"
-#include "NoseDetector.h"
+
 #include "Almacena.h"
 
 
@@ -22,7 +22,7 @@ private:
 public:
 	VectorFrames(void);
 	~VectorFrames(void);
-	void Decide(int i);
+	void Decide(int i,double marca,Mat velocara,Almacena cara,int profilesL, int profilesR);
 	void addtovector(FrameClasificado);
 	std::vector<FrameClasificado> getvector();
 	int comprobar (int i,double marca);
