@@ -19,28 +19,28 @@
 #include <opencv2/objdetect/objdetect.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
 #include <iostream>
 #include <stdio.h>
+#include "Runnable.h"
 
 using namespace std;
 using namespace cv;
 
-class Almacena
+
+class TemplateMatching :public Runnable
 {
 private:
-	std::vector<Rect> myfaces;
-
-
+	Mat template_cara;
+	Mat buscar_cara;
+	Mat result;
 
 public:
-	Almacena(void);
-	~Almacena(void);
-	void set_faces(std::vector<Rect> faces);
-
-
-	std::vector<Rect> get_faces();
-
-
+	TemplateMatching(void);
+	~TemplateMatching(void);
+	void match();
+	void setTemplate(Mat temp);
+	void setBuscar(Mat busc);
+	Mat getResult();
+	virtual void run();
 };
 

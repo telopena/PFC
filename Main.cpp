@@ -1,3 +1,20 @@
+/*
+# Copyright (C) 2013 Eutelo Pena Barreiro
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License Version 3
+# as published by the Free Software Foundation.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#  
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
 #include <opencv2/objdetect/objdetect.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -12,6 +29,7 @@
 #include "VectorFrames.h"
 #include "ProfileLeft.h"
 #include "ProfileRigth.h"
+#include "TemplateMatching.h"
 #include <time.h>
 
 using namespace std;
@@ -22,7 +40,8 @@ int main( void )
 {
 
 	CvCapture* capture;
-	Mat frame_capturado,frame_gray,frame_gray2,template_cara1,result1,buscar_cara,velocidad_cara;
+	Mat frame_capturado,frame_gray,frame_gray2,template_cara1,velocidad_cara,frameycrcb;
+	Mat channels[3];
 	Almacena almacena;
 	Draw draw;
 	FaceDetector face_detector;
@@ -30,14 +49,16 @@ int main( void )
 	VectorFrames vector_frames;
 	ProfileLeft profile_detectorL;
 	ProfileRigth profile_detectorR;
-	int retorno,i=0,solape_cara=1,profileL=0,profileR=0,state=0;
+	TemplateMatching matching;
+	int i=0,solape_cara=1,profileL=0,profileR=0,state=0;
 	double t_fps1,t_fps2,marca;
 	double minVal,maxVal;
 	Size dimensiones_cara;
-	Point2f p3,coor_cara;
+	Point2f coor_cara;
 	std::vector<Rect> newfaces,profilesL,profilesR;
-	Rect aux,face;
+	Rect aux,face,mask,aux2;
 	IplImage img1;
+	IplImage *roiImg=NULL;
 	CvPoint minloc,maxloc;
 
 	velocidad_cara.create(240,320,CV_8UC3);
@@ -64,9 +85,13 @@ int main( void )
 			marca= ((double)cv::getTickCount())*1000. / cv::getTickFrequency(); 
 			flip(frame_capturado,frame_capturado,1);
 			cvtColor(frame_capturado ,frame_gray , CV_BGR2GRAY );
-			cvtColor(frame_capturado,frame_gray2, CV_BGR2GRAY);
 			equalizeHist( frame_gray, frame_gray );
+			cvtColor(frame_capturado,frame_gray2, CV_BGR2GRAY);
 			equalizeHist( frame_gray2, frame_gray2 );
+			cvtColor(frame_capturado,frameycrcb,CV_BGR2YCrCb);
+			split(frameycrcb,channels);
+
+
 			velocidad_cara.create(240,320,CV_8UC3);
 
 			solape_cara=0;
@@ -76,28 +101,53 @@ int main( void )
 			frame_clasificado.setprofileR(0);
 
 
-
-
-
-
-
 			if( !frame_gray.empty() )
 			{ 
 
-				almacena=face_detector.Detect(frame_gray); 
 
-				profilesL = profile_detectorL.Detect(frame_gray2);
+				face_detector.setROI(frame_gray);
+				face_detector.start_thread();
 
-				profilesR = profile_detectorR.Detect(frame_gray2);
+				profile_detectorL.setROI(frame_gray);
+				profile_detectorL.start_thread();
 
-				if (profilesL.size() != 0) {
-					profileL = 1;
-					frame_clasificado.setprofileL(1);
+				profile_detectorR.setROI(frame_gray2);
+				profile_detectorR.start_thread();
+
+				if(i!=0){
+
+					matching.setBuscar(channels[1]);
+					matching.setTemplate(template_cara1);
+					matching.run();
+					//imshow("prob",matching.getResult());
 
 				}
-				if (profilesR.size() != 0) {
-					profileR = 1;
-					frame_clasificado.setprofileR(1);
+
+				face_detector.join_thread();
+				profile_detectorL.join_thread();
+				profile_detectorR.join_thread();
+
+
+				almacena.set_faces(face_detector.getVector());
+				profilesL = profile_detectorL.getVector();
+				profilesR = profile_detectorR.getVector();
+
+				for(size_t w = 0; w < (profilesL).size(); w++){
+					if (profilesL.size() != 0) {
+						profileL = 1;
+						frame_clasificado.setprofileL(1);
+
+
+					}
+				}
+
+				for(size_t w = 0; w < (profilesR).size(); w++){
+					if (profilesR.size() != 0) {
+						profileR = 1;
+						frame_clasificado.setprofileR(1);
+
+
+					}
 				}
 
 
@@ -149,11 +199,21 @@ int main( void )
 
 						dimensiones_cara=(almacena.get_faces())[w].size();
 
-						template_cara1=frame_gray(almacena.get_faces()[w]).clone();
-
 						face=almacena.get_faces()[w];
 						coor_cara.x=face.x+dimensiones_cara.width/2;
 						coor_cara.y=face.y+dimensiones_cara.height/2;
+
+						aux2.x=coor_cara.x-dimensiones_cara.width/4;
+						aux2.y=face.y;
+						aux2.width=dimensiones_cara.width*1/2;
+						aux2.height=dimensiones_cara.height;
+
+
+						template_cara1.release();
+						template_cara1=channels[1](aux2).clone();
+						//imshow("template",template_cara1);
+
+
 
 						solape_cara=1;
 
@@ -166,7 +226,7 @@ int main( void )
 					frame_clasificado.setTime(marca);
 					frame_clasificado.setdetect(1);
 					vector_frames.addtovector(frame_clasificado);
-					vector_frames.Decide(i,marca,velocidad_cara,almacena,profileL,profileR);
+					vector_frames.Decide(i,marca,velocidad_cara,almacena,profileL,profileR,frame_capturado);
 
 
 					i++;
@@ -175,20 +235,39 @@ int main( void )
 				}
 
 
-
-
 				if((i!=0 ) && (vector_frames.comprobar(i,marca)==1) && (almacena.get_faces().size()==0)){
 
+					img1=matching.getResult();
 
-					matchTemplate(frame_gray,template_cara1,result1,CV_TM_CCOEFF_NORMED);
+					if(roiImg!=NULL){
+						cvReleaseImage(&roiImg);
+						roiImg=NULL;
+					}
+
+					roiImg=cvCreateImage ( cvSize ( img1.width,img1.height ),8,1 );
+					cvZero(roiImg);
+					mask.x=face.x - dimensiones_cara.width*0.15;
+					mask.y=face.y-dimensiones_cara.height*0.15;
+					mask.width=1.15*dimensiones_cara.width;
+					mask.height=1.15*dimensiones_cara.height;
+					if(mask.x<0){mask.x=0;}
+					if(mask.y<0){mask.y=0;}
+					if(mask.x+mask.width > img1.width){mask.width=img1.width;}
+					if(mask.y+mask.height > img1.height){mask.height=img1.height;}
+
+					cvSetImageROI(roiImg,mask);
+					cvSet(roiImg,cvScalar(255));
+					cvResetImageROI(roiImg);
+					Mat telo=roiImg;
+					//imshow("telo",telo);
 
 
 
-					img1=result1;
+					cvMinMaxLoc(&img1,&minVal,&maxVal,&minloc,&maxloc,roiImg);
 
-					cvMinMaxLoc(&img1,&minVal,&maxVal,&minloc,&maxloc);
-					aux.x=maxloc.x;
-					aux.y=maxloc.y;
+
+					aux.x=maxloc.x - dimensiones_cara.width/4;
+					aux.y=maxloc.y ;
 					aux.width=dimensiones_cara.width;
 					aux.height=dimensiones_cara.height;
 
@@ -196,12 +275,9 @@ int main( void )
 
 					if(aux.x<0){aux.x=0;}
 					if(aux.y<0){aux.y=0;}
-					if(aux.x+aux.width > frame_gray.cols){aux.width=frame_gray.cols;}
-					if(aux.y+aux.height >frame_gray.rows){aux.height=frame_gray.rows;}
+
 
 					Point center_aux(aux.x+aux.width/2,aux.y+aux.height/2);
-
-
 
 
 					if((face.x < aux.x + aux.width) && (aux.x < face.x + face.width) && (face.y < aux.y +aux.height )){
@@ -219,7 +295,7 @@ int main( void )
 							int other_area= aux.width * aux.height;
 
 
-							if ((commun_area> ((other_area)*0.25))&& (commun_area> ((own_area)*0.25))){solape_cara=1;}
+							if ((commun_area> ((other_area)*0.50))&& (commun_area> ((own_area)*0.50))){solape_cara=1;}
 
 						}
 
@@ -231,6 +307,7 @@ int main( void )
 
 
 					if(solape_cara==1){
+
 						rectangle(frame_capturado,Point(aux.x,aux.y),Point(aux.x + aux.width,aux.y+aux.height),Scalar(0,0,255),1,CV_AA);
 
 						face=aux;
@@ -239,19 +316,12 @@ int main( void )
 						dimensiones_cara.width=aux.width;
 						dimensiones_cara.height=aux.height;
 
-
-
-
 					}
 
 
 					if(solape_cara==0){
-
-
-
 						rectangle(frame_capturado,Point(aux.x,aux.y),Point(aux.x + aux.width,aux.y+aux.height),Scalar(255,255,255),1,CV_AA);
 					}
-
 
 
 				}
@@ -261,8 +331,6 @@ int main( void )
 
 
 					if((i!=0) && (vector_frames.comprobar(i,marca)==1) && solape_cara==1 ){
-
-
 
 						newfaces.assign(1,aux);
 						almacena.set_faces(newfaces);
@@ -278,7 +346,7 @@ int main( void )
 						}
 
 						vector_frames.addtovector(frame_clasificado);
-						vector_frames.Decide(i,marca,velocidad_cara,almacena,profileL,profileR);
+						vector_frames.Decide(i,marca,velocidad_cara,almacena,profileL,profileR,frame_capturado);
 						i++;
 
 
@@ -291,7 +359,7 @@ int main( void )
 
 
 
-				imshow("velocidadcara",velocidad_cara);
+				//imshow("velocidadcara",velocidad_cara);
 
 				imshow("Aplicación",frame_capturado);
 
@@ -320,6 +388,7 @@ int main( void )
 	vector_frames.~VectorFrames();
 	profile_detectorR.~ProfileRigth();
 	profile_detectorL.~ProfileLeft();
+	matching.~TemplateMatching();
 	return 0;
 }
 

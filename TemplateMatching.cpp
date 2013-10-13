@@ -15,32 +15,35 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#pragma once
-#include <opencv2/objdetect/objdetect.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+#include "TemplateMatching.h"
 
-#include <iostream>
-#include <stdio.h>
 
-using namespace std;
-using namespace cv;
-
-class Almacena
+TemplateMatching::TemplateMatching(void) :Runnable()
 {
-private:
-	std::vector<Rect> myfaces;
+}
 
 
-
-public:
-	Almacena(void);
-	~Almacena(void);
-	void set_faces(std::vector<Rect> faces);
+TemplateMatching::~TemplateMatching(void)
+{
+}
 
 
-	std::vector<Rect> get_faces();
+void TemplateMatching::match(){
+	matchTemplate(buscar_cara,template_cara,result,CV_TM_CCOEFF_NORMED);
+}
 
+void TemplateMatching::setTemplate(Mat temp){
+	template_cara=temp;
+}
 
-};
+void TemplateMatching::setBuscar(Mat busc){
+	buscar_cara=busc;
+}
 
+Mat TemplateMatching::getResult(){
+	return(result);
+}
+
+void TemplateMatching::run(){
+	match();
+}

@@ -1,3 +1,20 @@
+/*
+# Copyright (C) 2013 Eutelo Pena Barreiro
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License Version 3
+# as published by the Free Software Foundation.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#  
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
 #include "VectorFrames.h"
 
 
@@ -38,7 +55,7 @@ int VectorFrames:: comprobar(int i, double marca){
 }
 
 
-void VectorFrames:: Decide(int i,double marca,Mat velocara,Almacena cara,int profilesL, int profilesR){
+void VectorFrames:: Decide(int i,double marca,Mat velocara,Almacena cara,int profilesL, int profilesR, Mat pintar){
 
 	if(i==0){frames[i].setlanzado(1);}
 
@@ -103,6 +120,8 @@ void VectorFrames:: Decide(int i,double marca,Mat velocara,Almacena cara,int pro
 				int contprofilesR = 0;
 				int contadoraux = 0;
 
+
+
 				while(frames[aux].getmy_decisionhor()!=0 && aux>=0){
 
 					if(frames[aux].getposcenter_x() > frames[i].getposcenter_x()){contposi++;}
@@ -154,6 +173,7 @@ void VectorFrames:: Decide(int i,double marca,Mat velocara,Almacena cara,int pro
 
 								if(izq>=2 || (profilesL == 1
 									&& contprofilesL > 0.7 * contadoraux)){
+
 										frames[i].setalgdecision(2);
 										alg1 = L;
 								}
@@ -231,7 +251,7 @@ void VectorFrames:: Decide(int i,double marca,Mat velocara,Almacena cara,int pro
 
 
 
-							//line(velocara,Point(300,50),Point(300,50),Scalar(255,0,0),3,8,0);
+
 						}
 					}
 				}
@@ -239,13 +259,16 @@ void VectorFrames:: Decide(int i,double marca,Mat velocara,Almacena cara,int pro
 
 
 
+			Point izq(0,120);
+			Point der(230,120);
+			Point arr(120,10);
+			Point aba(120,240);
 
 
-
-			if ((alg1==L) && (alg2==U)){frames[i].setalg1(L);decision=L;cout<<"izquierda"<<endl;}
-			if ((alg1==R) && (alg2==U)){frames[i].setalg1(R);decision=R;cout<<"derecha"<<endl;}
-			if ((alg1==U) && (alg2==UP)){decision=UP;cout<<"arriba"<<endl;}
-			if ((alg1==U) && (alg2==D)){decision=D;cout<<"abajo"<<endl;}
+			if ((alg1==L) && (alg2==U)){frames[i].setalg1(L);decision=L;cout<<"izquierda"<<endl;putText(pintar,"IZQUIERDA",izq,FONT_HERSHEY_COMPLEX_SMALL,0.80,(255,255,0),1,8);}
+			if ((alg1==R) && (alg2==U)){frames[i].setalg1(R);decision=R;cout<<"derecha"<<endl;putText(pintar,"DERECHA",der,FONT_HERSHEY_COMPLEX_SMALL,0.80,(255,255,0),1,8);}
+			if ((alg1==U) && (alg2==UP)){decision=UP;cout<<"arriba"<<endl;putText(pintar,"ARRIBA",arr,FONT_HERSHEY_COMPLEX_SMALL,0.80,(255,255,0),1,8);}
+			if ((alg1==U) && (alg2==D)){decision=D;cout<<"abajo"<<endl;putText(pintar,"ABAJO",aba,FONT_HERSHEY_COMPLEX_SMALL,0.80,(255,255,0),1,8);}
 
 			if(decision==L || decision==R || decision==UP || decision==D){
 				frames[i].setlanzado(1);

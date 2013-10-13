@@ -34,10 +34,10 @@ public:
 	virtual ~Runnable() { assert( !_id_valid ); };
 
 
-protected:
+	//protected:
 	// Subclasses will have to override this with the thread logic
 	virtual void run() = 0;
-
+protected:
 	//allow this function to access class details and run method
 	friend void *runnable_exec_redirector(void *arg);
 
