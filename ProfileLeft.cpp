@@ -23,7 +23,7 @@ vector<Rect> ProfileLeft::Detect(Mat gray) {
 	std::vector<Rect> profiles;
 
 	profile_classifier->detectMultiScale(gray, profiles, 1.2, 2,
-		CV_HAAR_SCALE_IMAGE |CV_HAAR_FIND_BIGGEST_OBJECT, Size(20, 34)); //20x34 //
+		CV_HAAR_SCALE_IMAGE |CV_HAAR_FIND_BIGGEST_OBJECT, Size((20*5*320)/640, (34*5*240)/480)); //20x34 //
 
 	return (profiles);
 

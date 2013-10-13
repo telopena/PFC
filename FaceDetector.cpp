@@ -31,7 +31,7 @@ Almacena FaceDetector::Detect(Mat gray){
 
 
 
-	face_classifier->detectMultiScale( gray, faces, 1.1, 2, 0|CV_HAAR_FIND_BIGGEST_OBJECT,Size((200*320)/640, (200*240)/480) ); //100x100
+	face_classifier->detectMultiScale( gray, faces, 1.2, 2, CV_HAAR_SCALE_IMAGE |CV_HAAR_FIND_BIGGEST_OBJECT,Size((200*320)/640, (200*240)/480) ); //100x100
 	almacena.set_faces(faces);
 
 

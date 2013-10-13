@@ -131,7 +131,7 @@ void VectorFrames:: Decide(int i,double marca,Mat velocara,Almacena cara,int pro
 							if(contposi>contnega){alg1=R;}
 							if(contnega>contposi){alg1=L;}
 
-							line(velocara,Point(300,50),Point(300,50),Scalar(0,0,255),3,8,0);
+
 						}
 					}
 
@@ -139,24 +139,28 @@ void VectorFrames:: Decide(int i,double marca,Mat velocara,Almacena cara,int pro
 						frames[i].getposcenter_x()
 						- frames[aux].getposcenter_x())
 							> 0.18 * cara.get_faces()[w].width) {
+								int der=0;
+								int izq=0;
+								int aux2=i;
 
-								line(velocara, Point(150, 50), Point(150, 50),
-									Scalar(0, 0, 255), 2, 8, 0);
 
+								for(int b=0;b<3;b++){
 
-								if (profilesL == 1
-									&& contprofilesL > 0.7 * contadoraux) {
-
-										frames[i].setalgdecision(2);
-										alg1 = L;
+									if(frames[aux2].getfacestate()==2){izq++;}
+									if(frames[aux2].getfacestate()==3){der++;}
+									aux2--;
 
 								}
-								if (profilesR == 1
-									&& contprofilesR > 0.7 * contadoraux) {
 
+								if(izq>=2 || (profilesL == 1
+									&& contprofilesL > 0.7 * contadoraux)){
+										frames[i].setalgdecision(2);
+										alg1 = L;
+								}
+								if(der>=2|| (profilesR == 1
+									&& contprofilesR > 0.7 * contadoraux) ){
 										frames[i].setalgdecision(2);
 										alg1 = R;
-
 								}
 
 					}
@@ -227,7 +231,7 @@ void VectorFrames:: Decide(int i,double marca,Mat velocara,Almacena cara,int pro
 
 
 
-							line(velocara,Point(300,50),Point(300,50),Scalar(255,0,0),3,8,0);
+							//line(velocara,Point(300,50),Point(300,50),Scalar(255,0,0),3,8,0);
 						}
 					}
 				}

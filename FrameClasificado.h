@@ -23,6 +23,7 @@ private:
 	int alg1;
 	int profileR;
 	int profileL;
+	int facestate;
 
 public:
 	FrameClasificado(void);
@@ -38,6 +39,7 @@ public:
 	void setalg1(int algLR);
 	void setprofileR(int profile);
 	void setprofileL(int profile);
+	void setfacestate(int opcion);
 
 	double getTime();
 	int getmy_decisionhor();
@@ -50,6 +52,7 @@ public:
 	int getalg1();
 	int getprofileR();
 	int getprofileL();
+	int getfacestate();
 
 };
 

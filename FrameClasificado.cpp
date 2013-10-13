@@ -6,9 +6,9 @@ FrameClasificado::FrameClasificado(void) {
 	my_decisionhor=0;
 	my_decisionver=0;
 	alg1 = 5;
-	profileL=0;
-	profileR=0;
-
+	profileL = 0;
+	profileR = 0;
+	facestate = -1;
 }
 
 FrameClasificado::~FrameClasificado(void) {
@@ -53,12 +53,16 @@ void FrameClasificado::setalg1(int algLR) {
 	alg1 = algLR;
 }
 
-void FrameClasificado::setprofileR(int profile){
-	profileR=profile;
+void FrameClasificado::setprofileR(int profile) {
+	profileR = profile;
 }
 
-void FrameClasificado::setprofileL(int profile){
-	profileL=profile;
+void FrameClasificado::setprofileL(int profile) {
+	profileL = profile;
+}
+void FrameClasificado::setfacestate(int opcion){
+	facestate=opcion;
+
 }
 
 
@@ -100,11 +104,13 @@ int FrameClasificado::getalgdecision() {
 int FrameClasificado::getalg1() {
 	return (alg1);
 }
-
-int FrameClasificado::getprofileR(){
-	return(profileR);
+int FrameClasificado::getprofileR() {
+	return (profileR);
 }
 
-int FrameClasificado::getprofileL(){
-	return(profileL);
+int FrameClasificado::getprofileL() {
+	return (profileL);
+}
+int FrameClasificado::getfacestate(){
+	return (facestate);
 }
